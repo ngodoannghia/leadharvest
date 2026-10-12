@@ -139,6 +139,7 @@ def run_crawl(
     crawl_all: bool = False,
     start_page: int = 1,
     end_page: int = 10,
+    limit: int | None = None,
     save_file: str | None = None,
     save_folder: str | None = None,
 ) -> int:
@@ -149,12 +150,16 @@ def run_crawl(
     print("=" * 70)
 
     cmd = [sys.executable, "-m", "scrapy.cmdline", "crawl", spider]
+    if limit is not None:
+        cmd.extend(["-a", f"limit={limit}"])
+        print(f"[+] Giới hạn số bản ghi: {limit}")
+
     if crawl_all:
         cmd.extend(["-a", "crawl_all=true"])
         if start_page > 1:
             cmd.extend(["-a", f"start_page={start_page}"])
         print(f"[+] Chế độ: CÀO TOÀN BỘ TẤT CẢ CÁC TRANG (bắt đầu từ trang {start_page})")
-    else:
+    elif spider != "vietfood":
         cmd.extend(["-a", f"start_page={start_page}", "-a", f"end_page={end_page}"])
         print(f"[+] Chế độ: Cào từ trang {start_page} đến trang {end_page}")
 
@@ -209,12 +214,8 @@ def analyze_jsonl_file(fpath: str) -> dict[str, any]:
                 has_hot = sec_type == PhoneType.HOTLINE.value
                 has_any = bool(data.get("phone_primary")) or bool(data.get("phone_secondary"))
             else:
-                phones_raw = []
-                if data.get("raw_phone"):
-                    phones_raw.append(data["raw_phone"])
-                phones_raw.extend(data.get("raw_phones", []))
-
-                extracted = extract_phones(phones_raw)
+                raw_p = data.get("raw_phone") or data.get("raw_phones")
+                extracted = extract_phones(raw_p)
                 has_mob = any(p.type is PhoneType.MOBILE for p in extracted)
                 has_land = any(p.type is PhoneType.LANDLINE for p in extracted)
                 has_hot = any(p.type is PhoneType.HOTLINE for p in extracted)
@@ -343,6 +344,12 @@ def main():
         help="Trang kết thúc khi không dùng --all (mặc định: 10)",
     )
     crawl_parser.add_argument(
+        "--limit",
+        type=int,
+        default=None,
+        help="Giới hạn số lượng bản ghi cần cào (dùng để test thử nghiệm)",
+    )
+    crawl_parser.add_argument(
         "--save-file",
         "--filename",
         dest="save_file",
@@ -391,6 +398,7 @@ def main():
             crawl_all=args.crawl_all,
             start_page=args.start_page,
             end_page=args.end_page,
+            limit=args.limit,
             save_file=args.save_file,
             save_folder=args.save_folder,
         ))

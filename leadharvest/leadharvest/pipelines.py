@@ -145,14 +145,12 @@ class RawLeadStoragePipeline:
                 self.seen_urls.add(url)
 
         # Thống kê loại số điện thoại
-        phones_raw = []
-        if hasattr(item, "get_all_raw_phones"):
-            phones_raw = item.get_all_raw_phones()
+        if hasattr(item, "raw_phone"):
+            phones_raw = item.raw_phone
         elif isinstance(item, dict):
-            raw_p = item.get("raw_phone")
-            if raw_p:
-                phones_raw.append(raw_p)
-            phones_raw.extend(item.get("raw_phones", []))
+            phones_raw = item.get("raw_phone") or item.get("raw_phones")
+        else:
+            phones_raw = None
 
         st = self.stats.get(spider)
         if st is not None:
