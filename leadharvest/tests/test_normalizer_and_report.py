@@ -65,6 +65,25 @@ def test_normalize_reject_retail_excluded_keyword():
     assert res.reject_reason == RejectReason.EXCLUDED_KEYWORD
 
 
+def test_normalize_multisector_company_prefers_core_name():
+    """Kiểm tra doanh nghiệp có tên Thủy Sản nhưng mô tả có rau củ quả vẫn vào Thủy Sản (BA §3.4)."""
+    raw = RawLead(
+        company_name="CÔNG TY CP THỦY SẢN BẠC LIÊU",
+        target_segment="Thủy sản",
+        raw_phone="02913849567",
+        province="Cà Mau",
+        address="Số 89 Quốc Lộ 1A, khóm 2, phường Giá Rai, Tỉnh Cà Mau",
+        description="Chế biến, Xuất khẩu. Tôm đông lạnh, mực đông lạnh, chả cá đông lạnh, rau củ quả đông lạnh (đậu bắp, cà tím, ớt chuông, khoai lang, bí ngòi, dưa leo…)",
+        source_name="VASEP",
+    )
+
+    res = normalize_raw_lead(raw)
+    assert res.lead is not None
+    assert res.lead.target_segment == Segment.THUY_SAN.value
+    assert res.lead.company_name == "CÔNG TY CP THỦY SẢN BẠC LIÊU"
+
+
+
 def test_generate_qa_report_metrics():
     # Giả lập 2 leads hợp lệ
     lead1 = LeadOutput(

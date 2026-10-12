@@ -27,10 +27,10 @@ SEGMENT_RULES: dict[Segment, SegmentRule] = {
     Segment.NONG_SAN: SegmentRule(
         segment=Segment.NONG_SAN,
         positive_keywords=(
-            "vựa trái cây", "vựa rau củ", "vựa nông sản", "htx nông nghiệp",
+            "nông sản", "vựa trái cây", "vựa rau củ", "vựa nông sản", "htx nông nghiệp",
             "hợp tác xã nông nghiệp", "sơ chế nông sản", "đóng gói nông sản",
             "chế biến nông sản", "xuất khẩu nông sản", "nông sản xuất khẩu",
-            "kho nông sản", "trái cây sấy", "rau củ quả"
+            "kho nông sản", "trái cây sấy", "rau củ quả", "hạt điều", "cà phê", "hồ tiêu"
         ),
         negative_keywords=(
             "cửa hàng hoa quả nhập khẩu", "trái cây dĩa", "nước ép",
@@ -40,10 +40,16 @@ SEGMENT_RULES: dict[Segment, SegmentRule] = {
     Segment.THUY_SAN: SegmentRule(
         segment=Segment.THUY_SAN,
         positive_keywords=(
-            "chế biến thủy sản", "chế biến hải sản", "thủy hải sản đông lạnh",
-            "vựa tôm", "vựa cá", "vựa cua", "xuất khẩu hải sản", "xuất khẩu thủy sản",
-            "thủy sản đông lạnh", "hải sản đông lạnh", "nhà máy thủy sản",
-            "nuôi trồng thủy sản", "chế biến tôm", "chế biến cá tra"
+            "thủy sản", "thuỷ sản", "hải sản", "thủy hải sản", "thuỷ hải sản",
+            "chế biến thủy sản", "chế biến thuỷ sản", "chế biến hải sản",
+            "thủy hải sản đông lạnh", "thuỷ hải sản đông lạnh",
+            "vựa tôm", "vựa cá", "vựa cua", "xuất khẩu hải sản",
+            "xuất khẩu thủy sản", "xuất khẩu thuỷ sản",
+            "thủy sản đông lạnh", "thuỷ sản đông lạnh", "hải sản đông lạnh",
+            "nhà máy thủy sản", "nhà máy thuỷ sản",
+            "nuôi trồng thủy sản", "nuôi trồng thuỷ sản",
+            "chế biến tôm", "chế biến cá tra", "cá tra", "basa",
+            "tôm đông lạnh", "mực đông lạnh", "chả cá đông lạnh", "surimi", "cá ngừ", "bạch tuộc"
         ),
         negative_keywords=(
             "quán ăn hải sản", "nhà hàng hải sản", "quán ốc", "hồ câu",
@@ -53,7 +59,7 @@ SEGMENT_RULES: dict[Segment, SegmentRule] = {
     Segment.CAO_SU: SegmentRule(
         segment=Segment.CAO_SU,
         positive_keywords=(
-            "chế biến mủ cao su", "mủ cao su", "đại lý mủ cao su", "thu mua mủ",
+            "cao su", "chế biến mủ cao su", "mủ cao su", "đại lý mủ cao su", "thu mua mủ",
             "cao su thiên nhiên", "nông trường cao su", "nhà máy mủ", "mủ tờ", "mủ chén"
         ),
         negative_keywords=(
@@ -64,8 +70,8 @@ SEGMENT_RULES: dict[Segment, SegmentRule] = {
     Segment.DET_MAY: SegmentRule(
         segment=Segment.DET_MAY,
         positive_keywords=(
-            "xưởng may gia công", "sản xuất may mặc", "xưởng cắt may",
-            "công ty may xuất khẩu", "xưởng may", "may xuất khẩu", "dệt may",
+            "dệt may", "may mặc", "xưởng may gia công", "sản xuất may mặc", "xưởng cắt may",
+            "công ty may xuất khẩu", "xưởng may", "may xuất khẩu",
             "gia công may mặc", "chuyền may", "xưởng thêu", "xưởng in vải"
         ),
         negative_keywords=(
@@ -76,9 +82,9 @@ SEGMENT_RULES: dict[Segment, SegmentRule] = {
     Segment.PHAN_BON: SegmentRule(
         segment=Segment.PHAN_BON,
         positive_keywords=(
-            "nhà máy phân bón", "sản xuất phân bón", "phân bón npk", "phân bón hữu cơ",
+            "phân bón", "nhà máy phân bón", "sản xuất phân bón", "phân bón npk", "phân bón hữu cơ",
             "phối trộn phân bón", "đại lý vtnn cấp 1", "đại lý vật tư nông nghiệp cấp 1",
-            "phân vi sinh", "nhà máy hóa chất nông nghiệp"
+            "phân vi sinh", "nhà máy hóa chất nông nghiệp", "vật tư nông nghiệp"
         ),
         negative_keywords=(
             "cửa hàng hoa kiểng lẻ", "hoa cảnh mini", "tiệm cây cảnh mini"
@@ -87,7 +93,7 @@ SEGMENT_RULES: dict[Segment, SegmentRule] = {
     Segment.CAY_TRONG: SegmentRule(
         segment=Segment.CAY_TRONG,
         positive_keywords=(
-            "vườn ươm", "cây giống", "trại ươm cây", "cây lâm nghiệp",
+            "cây trồng", "vườn ươm", "cây giống", "trại ươm cây", "cây lâm nghiệp",
             "cây ăn trái", "sản xuất cây giống", "trại cây giống", "ươm giống cây"
         ),
         negative_keywords=(
@@ -123,6 +129,8 @@ def classify_text_to_segment(
     # 2. Tính điểm phân loại cho từng ngành và kiểm tra từ khóa cấm
     scores: dict[Segment, int] = {seg: 0 for seg in Segment}
     violations: dict[Segment, str] = {}
+    name_lower = (name or "").lower()
+    desc_lower = (description or "").lower()
 
     for seg, rule in SEGMENT_RULES.items():
         for neg_kw in rule.negative_keywords:
@@ -134,16 +142,19 @@ def classify_text_to_segment(
             continue
 
         for pos_kw in rule.positive_keywords:
-            if re.search(rf"\b{re.escape(pos_kw)}\b", combined_text):
+            # Ưu tiên rất cao (+5 điểm) nếu từ khóa xuất hiện trong Tên Doanh Nghiệp (BA §3.4: hoạt động cốt lõi thể hiện qua tên)
+            if re.search(rf"\b{re.escape(pos_kw)}\b", name_lower):
+                scores[seg] += 5
+            elif re.search(rf"\b{re.escape(pos_kw)}\b", desc_lower):
                 scores[seg] += 2
 
     # Nếu vi phạm từ khóa loại trừ của default_segment -> từ chối ngay
     if default_segment and default_segment in violations:
         return None, [violations[default_segment]]
 
-    # Nếu có default segment hợp lệ
+    # Nếu có default segment hợp lệ từ nguồn cào chuyên ngành -> ưu tiên thêm +3 điểm
     if default_segment and default_segment not in violations:
-        scores[default_segment] += 1
+        scores[default_segment] += 3
 
     best_seg = max(scores, key=lambda s: scores[s])
     if scores[best_seg] > 0:

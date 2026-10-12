@@ -4,3 +4,4 @@ scrapy
 leadharvest/data
 leadharvest/.pytest_cache
 .pytest_cache
+__pycache__
