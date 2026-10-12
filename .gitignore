@@ -1,3 +1,6 @@
-linkedin_scraper
 vnstock
+scrapy
 .venv
+leadharvest/data
+leadharvest/.pytest_cache
+.pytest_cache
