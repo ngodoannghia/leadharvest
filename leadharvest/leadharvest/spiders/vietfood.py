@@ -202,6 +202,7 @@ class VietfoodSpider(BaseLeadSpider):
         tax_code: str | None = None
         contact_person: str | None = None
         english_name: str | None = None
+        full_detail_lines: list[str] = []
 
         if target_editor:
             # Lấy tất cả các dòng text, chuẩn hóa unicode NFKC và xóa ký tự ẩn &nbsp;
@@ -211,6 +212,7 @@ class VietfoodSpider(BaseLeadSpider):
                 norm_line = unicodedata.normalize("NFKC", line).replace("\xa0", " ").strip()
                 if norm_line:
                     cleaned_lines.append(norm_line)
+            full_detail_lines = cleaned_lines
 
             for line in cleaned_lines:
                 # --- Địa chỉ ---
@@ -328,11 +330,13 @@ class VietfoodSpider(BaseLeadSpider):
             extra_data["english_name"] = english_name
 
         # 6. Tạo mô tả
-        description_parts = []
-        if english_name:
-            description_parts.append(english_name)
-        description_parts.append("Hội viên Hiệp hội Lương thực Việt Nam (VFA)")
-        description = ". ".join(description_parts)
+        # Toàn bộ nội dung chi tiết của doanh nghiệp (tất cả các trường), lưu dạng string
+        description_lines = [f"Tên doanh nghiệp: {company_name}"]
+        description_lines.extend(full_detail_lines)
+        if province_candidate:
+            description_lines.append(f"Tỉnh/Thành (tag): {province_candidate}")
+        description_lines.append("Hội viên Hiệp hội Lương thực Việt Nam (VFA)")
+        description = "\n".join(description_lines)
 
         # 7. Trả về RawLead qua helper make_raw_lead
         raw_phone_str = " / ".join(raw_phones) if raw_phones else None

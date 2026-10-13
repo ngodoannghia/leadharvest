@@ -175,6 +175,7 @@ class VasepSpider(BaseLeadSpider):
         link_detail = meta.get("link_detail", response.url)
 
         row_dict = {}
+        full_detail_lines: list[str] = []
         rows = response.css(".table-responsive table.table-condensed tr, .table-responsive table tr")
         for row in rows:
             cols = [t.strip() for t in row.xpath(".//td//text() | .//th//text()").getall() if t.strip()]
@@ -182,9 +183,11 @@ class VasepSpider(BaseLeadSpider):
                 key = cols[0].lower().strip(": ")
                 val = " ".join(cols[1:]).strip()
                 row_dict[key] = val
+                full_detail_lines.append(f"{cols[0].strip(': ')}: {val}")
             elif len(cols) == 1 and ":" in cols[0]:
                 parts = cols[0].split(":", 1)
                 row_dict[parts[0].lower().strip()] = parts[1].strip()
+                full_detail_lines.append(f"{parts[0].strip()}: {parts[1].strip()}")
 
         company_name = (row_dict.get("tên doanh nghiệp") or meta.get("name_company_list", "")).strip()
         if not company_name:
@@ -234,7 +237,8 @@ class VasepSpider(BaseLeadSpider):
             if len(candidate) > 10:
                 factory_address = candidate
 
-        description = f"{field_activity}. {product}".strip(" .")
+        # Toàn bộ nội dung chi tiết của doanh nghiệp (tất cả các trường), lưu dạng string
+        description = "\n".join(full_detail_lines) or f"{field_activity}. {product}".strip(" .")
 
         yield self.make_raw_lead(
             company_name=company_name.strip(),
