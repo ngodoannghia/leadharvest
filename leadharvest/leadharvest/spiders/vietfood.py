@@ -159,8 +159,17 @@ class VietfoodSpider(BaseLeadSpider):
                 )
 
         company_name = (company_name or "").strip()
+        if not company_name:
+            self.logger.warning(f"[VIETFOOD] Không tìm thấy tên công ty tại: {response.url}")
+            return
 
-        # 2. Trích xuất tỉnh / thành phố từ meta article:tag của WordPress
+        # Loại bỏ các đơn vị là trường đại học, cao đẳng, học viện hoặc ngân hàng
+        if self.is_excluded_organization(company_name):
+            self.logger.info(
+                f"[VIETFOOD] Bỏ qua đơn vị trường học / ngân hàng / viện đào tạo: '{company_name}' ({response.url})"
+            )
+            return
+
         tags = response.css("meta[property='article:tag']::attr(content)").getall()
         province_candidate: str | None = None
         for tag in tags:

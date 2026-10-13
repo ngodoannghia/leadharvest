@@ -5,5 +5,7 @@ Spiders package for LeadHarvest.
 from leadharvest.spiders.base import BaseLeadSpider
 from leadharvest.spiders.vasep import VasepSpider
 from leadharvest.spiders.vietfood import VietfoodSpider
+from leadharvest.spiders.vietnamtextile import VietnamTextileSpider
 
-__all__ = ["BaseLeadSpider", "VasepSpider", "VietfoodSpider"]
+__all__ = ["BaseLeadSpider", "VasepSpider", "VietfoodSpider", "VietnamTextileSpider"]
+

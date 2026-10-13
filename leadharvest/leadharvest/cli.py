@@ -159,7 +159,7 @@ def run_crawl(
         if start_page > 1:
             cmd.extend(["-a", f"start_page={start_page}"])
         print(f"[+] Chế độ: CÀO TOÀN BỘ TẤT CẢ CÁC TRANG (bắt đầu từ trang {start_page})")
-    elif spider != "vietfood":
+    elif spider not in ("vietfood", "vietnamtextile"):
         cmd.extend(["-a", f"start_page={start_page}", "-a", f"end_page={end_page}"])
         print(f"[+] Chế độ: Cào từ trang {start_page} đến trang {end_page}")
 

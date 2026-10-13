@@ -186,8 +186,19 @@ class VasepSpider(BaseLeadSpider):
                 parts = cols[0].split(":", 1)
                 row_dict[parts[0].lower().strip()] = parts[1].strip()
 
-        company_name = row_dict.get("tên doanh nghiệp") or meta.get("name_company_list", "")
+        company_name = (row_dict.get("tên doanh nghiệp") or meta.get("name_company_list", "")).strip()
+        if not company_name:
+            return
+
+        # Loại bỏ các đơn vị là trường đại học, cao đẳng, học viện hoặc ngân hàng
+        if self.is_excluded_organization(company_name):
+            self.logger.info(
+                f"[VASEP] Bỏ qua đơn vị trường học / ngân hàng / viện đào tạo: '{company_name}' ({response.url})"
+            )
+            return
+
         raw_address = row_dict.get("địa chỉ") or ""
+
         province = (
             row_dict.get("tỉnh thành phố")
             or row_dict.get("tỉnh/thành phố")

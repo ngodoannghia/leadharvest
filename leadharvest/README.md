@@ -39,11 +39,12 @@ leadharvest/
 │   ├── spiders/
 │   │   ├── base.py                     # BaseLeadSpider
 │   │   ├── vasep.py                    # Spider cào hội viên VASEP (Thủy sản)
-│   │   └── vietfood.py                 # Spider cào hội viên Vietfood - VFA (Nông sản)
+│   │   ├── vietfood.py                 # Spider cào hội viên Vietfood - VFA (Nông sản)
+│   │   └── vietnamtextile.py           # Spider cào hội viên VITAS (Dệt may)
 │   ├── pipelines.py                    # Pipeline lưu raw JSONL + checkpoint chống trùng
 │   ├── settings.py                     # Cấu hình crawler Scrapy
 │   └── cli.py                          # Lệnh build dữ liệu và xuất báo cáo QA
-└── tests/                              # Bộ 51 test cases tự động (100% pass)
+└── tests/                              # Bộ 60 test cases tự động (100% pass)
     ├── fixtures/                       # Dữ liệu HTML mẫu phục vụ kiểm thử offline
     ├── test_phone.py
     ├── test_tax_code.py
@@ -51,8 +52,10 @@ leadharvest/
     ├── test_deduplicator.py
     ├── test_normalizer_and_report.py
     ├── test_vasep_spider.py
-    └── test_vietfood_spider.py
+    ├── test_vietfood_spider.py
+    └── test_vietnamtextile_spider.py
 ```
+
 
 ---
 
@@ -92,6 +95,116 @@ Do đó hệ thống chạy theo 2 pha tách biệt:
 | :--- | :--- | :--- | :--- | :--- |
 | **`vasep`** | Hiệp hội Chế biến và Xuất khẩu Thủy sản Việt Nam ([vasep.com.vn](https://vasep.com.vn/hoi-vien)) | **Thủy sản** | ~500+ doanh nghiệp | Bảng chi tiết: Tên pháp nhân, MST, Người đại diện, SĐT, Email, Website, Tách địa chỉ xưởng/nhà máy khỏi VPDD. |
 | **`vietfood`** | Hiệp hội Lương thực Việt Nam - VFA ([vietfood.org.vn](https://vietfood.org.vn/hoi-vien/danh-sach-hoi-vien/)) | **Nông sản** | 131 doanh nghiệp | Trang chi tiết Elementor: Tên tiếng Việt (xóa dấu `*` liên kết), Tên quốc tế, Địa chỉ, Tỉnh/thành (thẻ SEO tag), Tel (tách số ghép), Email, Website, Fax, Logo. |
+| **`vietnamtextile`** | Hiệp hội Dệt may Việt Nam - VITAS ([vietnamtextile.org.vn](http://www.vietnamtextile.org.vn/hoi-vien-vitas_p1_1-1_2-1_3-676.html)) | **Dệt may** | 402 doanh nghiệp (21 trang) | Trang chi tiết: Tên pháp nhân, Tên tiếng Anh, Địa chỉ chi tiết, Tự động nhận diện Tỉnh/Thành, Điện thoại (tách số ghép/số bàn), Fax, Email, Website, Giám đốc/Chủ tịch, Hoạt động chính. |
+
+---
+
+### 3.2. Chạy Crawler VASEP (Phân khúc Thủy sản)
+
+**Lựa chọn 1: Cào toàn bộ tất cả các trang hội viên VASEP (tự động phân trang đến trang cuối cùng)**:
+```bash
+cd leadharvest
+# Qua Scrapy:
+scrapy crawl vasep -a crawl_all=true
+
+# Hoặc qua CLI LeadHarvest:
+python -m leadharvest.cli crawl --spider vasep --all
+```
+
+**Lựa chọn 2: Cào theo khoảng trang (mặc định: trang 1 đến 10)**:
+```bash
+cd leadharvest
+# Qua Scrapy:
+scrapy crawl vasep -a start_page=1 -a end_page=10
+
+# Hoặc qua CLI LeadHarvest:
+python -m leadharvest.cli crawl --spider vasep --start-page 1 --end-page 10
+```
+
+**Lựa chọn 3: Giới hạn số lượng bản ghi (tham số `limit`)**:
+```bash
+scrapy crawl vasep -a limit=15
+```
+
+**Tùy chọn lưu file cho VASEP**:
+```bash
+scrapy crawl vasep -a start_page=1 -a end_page=5 -a save_file=vasep_dot1.jsonl
+```
+
+---
+
+### 3.3. Chạy Crawler Vietfood (Phân khúc Nông sản)
+
+Hội viên Vietfood được hiển thị danh sách 131 đơn vị trực tiếp tại trang `/hoi-vien/danh-sach-hoi-vien/`.
+
+**Lựa chọn 1: Cào toàn bộ 131 hội viên Vietfood**:
+```bash
+cd leadharvest
+# Qua Scrapy:
+scrapy crawl vietfood
+
+# Hoặc qua CLI LeadHarvest:
+python -m leadharvest.cli crawl --spider vietfood
+```
+
+**Lựa chọn 2: Cào thử nghiệm N hội viên (tham số `limit`)**:
+```bash
+cd leadharvest
+# Cào thử nghiệm 10 hội viên:
+scrapy crawl vietfood -a limit=10
+
+# Hoặc qua CLI:
+python -m leadharvest.cli crawl --spider vietfood --limit 10
+```
+
+**Lựa chọn 3: Tùy chọn lưu vào file tùy chỉnh**:
+```bash
+# Lưu vào file riêng trong data/raw/:
+scrapy crawl vietfood -a save_file=vietfood_raw.jsonl
+
+# Hoặc qua CLI:
+python -m leadharvest.cli crawl --spider vietfood --save-file vietfood_raw.jsonl
+```
+
+Dữ liệu thô cào về sẽ được lưu tự động dạng JSON Lines tại `data/raw/vietfood.jsonl` (hoặc file chỉ định), kèm cơ chế checkpoint theo URL đã cào để không bị trùng bản ghi khi chạy lại.
+
+---
+
+### 3.4. Chạy Crawler VietnamTextile (Phân khúc Dệt may)
+
+Hội viên VITAS gồm 402 đơn vị phân bổ qua 21 trang tại `http://www.vietnamtextile.org.vn/hoi-vien-vitas_p1_1-1_2-1_3-676.html`.
+
+**Lựa chọn 1: Cào toàn bộ 402 hội viên VITAS (tự động duyệt qua toàn bộ 21 trang)**:
+```bash
+cd leadharvest
+# Qua Scrapy:
+scrapy crawl vietnamtextile
+
+# Hoặc qua CLI LeadHarvest:
+python -m leadharvest.cli crawl --spider vietnamtextile
+```
+
+**Lựa chọn 2: Cào thử nghiệm N hội viên (tham số `limit`)**:
+```bash
+cd leadharvest
+# Cào thử nghiệm 10 hội viên:
+scrapy crawl vietnamtextile -a limit=10
+
+# Hoặc qua CLI:
+python -m leadharvest.cli crawl --spider vietnamtextile --limit 10
+```
+
+**Lựa chọn 3: Tùy chọn lưu vào file tùy chỉnh**:
+```bash
+# Lưu vào file riêng trong data/raw/:
+scrapy crawl vietnamtextile -a save_file=vietnamtextile_raw.jsonl
+
+# Hoặc qua CLI:
+python -m leadharvest.cli crawl --spider vietnamtextile --save-file vietnamtextile_raw.jsonl
+```
+
+Dữ liệu thô cào về sẽ được lưu tự động dạng JSON Lines tại `data/raw/vietnamtextile.jsonl` (hoặc file chỉ định), kèm checkpoint theo URL chống trùng lặp.
+
 
 ---
 

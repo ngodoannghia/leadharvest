@@ -87,13 +87,15 @@ def normalize_province_name(raw_province: str | None) -> str | None:
     if not raw_province:
         return None
 
-    cleaned = clean_whitespace(raw_province)
+    cleaned = clean_whitespace(raw_province).replace(".", " ")
+    cleaned = clean_whitespace(cleaned)
     key = strip_accents(cleaned)
-    # Loại bỏ các tiền tố phổ biến
-    key = re.sub(r"^(?:tinh|tp\.?|thanh pho|t\.?p\.?)\s+", "", key).strip()
+    # Loại bỏ các tiền tố phổ biến (tỉnh, tp, thành phố)
+    key = re.sub(r"^(?:tinh|tp|thanh pho|t p)\s+", "", key).strip()
 
     if key in _PROVINCE_ALIAS_MAP:
         return _PROVINCE_ALIAS_MAP[key]
+
 
     # Kiểm tra partial match
     for k, v in _PROVINCE_ALIAS_MAP.items():

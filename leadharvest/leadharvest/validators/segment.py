@@ -103,8 +103,12 @@ SEGMENT_RULES: dict[Segment, SegmentRule] = {
 }
 
 GLOBAL_EXCLUDED_KEYWORDS: tuple[str, ...] = (
-    "sạp chợ", "quán nước", "quán cơm", "nhà hàng", "quán cà phê", "cafe"
+    "sạp chợ", "quán nước", "quán cơm", "nhà hàng", "quán cà phê", "cafe",
+    "trường đại học", "đại học", "trường đh", "trường cao đẳng", "cao đẳng",
+    "học viện", "trường trung cấp", "university", "college", "academy",
+    "ngân hàng", "ngan hang", "quỹ tín dụng",
 )
+
 
 
 def is_record_inactive(text: str | None) -> bool:
